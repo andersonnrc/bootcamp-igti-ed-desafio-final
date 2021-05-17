@@ -40,7 +40,7 @@ default_args = {
 }
 
 @dag(default_args = default_args, schedule_interval = None, 
-     description = 'ETL de dados do MongoDB e IBGE para o PostgreSQL')
+     description = 'ETL de dados do MongoDB e IBGE para o PostgreSQL e Azure Blob Storage')
 def desafio_final_igti():
 
     @task

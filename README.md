@@ -38,7 +38,7 @@ A seguir como ficou a regra de Firewall para permitir o acesso à porta 8080.
 
 ![](/images/04_vm_gcp_firewall.png "Regra de Firewall")
 
-Agora precisamos editar a VM para liberar o acesso remoto. No campo **Tags de rede** basta adicionar a tag criada no passo anterior. COnforme a imagem a seguir, observe que foi adionada a tag **access-http**
+Agora precisamos editar a VM para liberar o acesso remoto. No campo **Tags de rede** basta adicionar a tag criada no passo anterior. Conforme a imagem a seguir, observe que foi adionada a tag **access-http**
 
 ![](/images/05_vm_gcp_tags_rede.png "Tags de rede")
 
@@ -63,9 +63,9 @@ Basta clicar no recurso criado do PostgreSQL e depois em **Segurança de conexã
 
 Após as configurações do Firewall, já é possível conectar com uma ferramenta cliente ao banco de dados, basta utilizar as credenciais de acesso informadas na criação do banco de dados. Ao conectar é necessário criar um banco de dados para que o mesmo seja o DW do pipeline de dados. Para o desafio o nome do banco de dados criado foi **db_desafio_igti**.
 
-A ferramenta cliente utilizada para conectar no PostgreSQL da Aszure foi o [DBeaver](https://dbeaver.io/)
+A ferramenta cliente utilizada para conectar no PostgreSQL da Azure foi o [DBeaver](https://dbeaver.io/)
 
-## Instalação do Python e Airflow na VM do GCP
+## Instalação do Python e Airflow na VM do GCP e outras configurações
 
 O repositório contém o arquivo [requirements.txt](https://github.com/andersonnrc/bootcamp-igti-ed-desafio-final/blob/main/requirements.txt) com todas as dependências que necessitam ser instaladas. Apesar disso vou demonstrar passo a passo o que precisa ser instalado.
 
@@ -105,7 +105,7 @@ $ conda activate airflow-igti
 $ pip install apache-airflow
 ```
 
-7) COnfigurar Airflow
+7) Configurar Airflow
 
 ```
 $ airflow db init
@@ -137,3 +137,77 @@ $ pip install azure-storage-blob==2.1.0
 ```
 $ pip install psycopg2-binary
 ```
+
+12) Agora basta observar no diretório home do usuário que há uma pasta criada com o nome **airflow**. Basta entrar na pasta. Será necessário criar uma pasta com o nome **dags**. Entre nessa pasta e crie um arquivo com o nome [desafio_final_igti.py](https://github.com/andersonnrc/bootcamp-igti-ed-desafio-final/blob/main/dags/desafio_final_igti.py) e copiar e colar o respectivo código.
+
+13) Criação de arquivo de shell script para inicializar servidor web do Airflow juntamente com o scheduler. Voltar ao diretório anterior e criar um arquivo com o nome **start.sh** e informar o conteúdo a seguir:
+
+```
+#!/bin/bash
+
+airflow webserver -p 8080
+
+airflow scheduler
+```
+
+Para dar permissão de execução ao arquivo basta digitar:
+
+```
+chmod +x start.sh
+```
+
+14) Execução do arquivo shell script em segundo plano para acessar a interface do airflow
+
+```
+nohup ./start.sh &
+```
+
+15) Acesso pelo browser.
+
+Agora é só digitar o IP da VM do GCP seguido da porta 8080. Vai aparecer a tela de login. É só informar as credenciais de acesso fornecidas no passo 8.
+
+![](/images/08_gcp_airflow_login.png "Tela login Airflow")
+
+16) Criar variáveis no Airflow.
+
+Para evitar informar no código da aplicação dados sensíveis relacionados a usuários, senhas e chaves, dados de conexão ao banco de dados etc, é possível cadastrar no Airflow, para isso é só acessar o menu **Admin - Variables**. Confira a seguir todas as variáveis cadastradas:
+
+![](/images/09_gcp_airflow_variables.png "Variáveis Airflow")
+
+## Execução da aplicação
+
+Executar a aplicação é bem simples, necessitando apenas acessar a Dag na interface do Airflow e clicar em **Trigger DAG**
+
+![](/images/10_gcp_airflow_trigger.png "Executar pipeline")
+
+Após a execução o pipeline apresentará o resultado a seguir:
+
+![](/images/11_gcp_airflow_pipeline_execution.png "Pipeline executado")
+
+## Resultado
+
+Vamos conferir os dados gravados no Azure Blob Storage:
+
+![](/images/12_azure_blob_container.png "Contêiner criado na Azure com arquivos")
+
+E vamos verificar os dados no PostgreSQL:
+
+![](/images/13_azure_postgresql.png "Dados no PostgreSQL da Azure")
+
+## Referências:
+
+* [Google Cloud Platform](https://cloud.google.com)
+
+* [Microsoft Azure](https://azure.microsoft.com/pt-br/)
+
+* [Apache Airflow](https://airflow.apache.org/)
+
+* [Gerenciar Blobs com SDK do Python](https://docs.microsoft.com/pt-br/azure/storage/blobs/storage-quickstart-blobs-python-legacy)
+
+* [Configuração para conexão remota no GCP (criar tags de rede)](https://docs.microsoft.com/pt-br/azure/storage/blobs/storage-quickstart-blobs-python-legacy)
+
+### Contato
+
+[Linkedin](https://www.linkedin.com/in/anderson-ribeiro-carvalho)
+
+
